@@ -1,4 +1,5 @@
-import { Instagram, Youtube } from "lucide-react";
+import { Instagram, Youtube, Lock } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 export function Footer() {
   return (
@@ -14,7 +15,7 @@ export function Footer() {
             target="_blank"
             rel="noreferrer"
             aria-label="Instagram"
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-offer text-primary-foreground shadow-soft transition-transform hover:scale-110"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-offer text-primary-foreground shadow-soft transition-transform hover:scale-110 hover:rotate-6"
           >
             <Instagram className="h-5 w-5" />
           </a>
@@ -23,7 +24,7 @@ export function Footer() {
             target="_blank"
             rel="noreferrer"
             aria-label="YouTube"
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-soft transition-transform hover:scale-110"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-soft transition-transform hover:scale-110 hover:-rotate-6"
           >
             <Youtube className="h-5 w-5" />
           </a>
@@ -31,6 +32,12 @@ export function Footer() {
         <p className="mt-6 text-xs text-muted-foreground">
           © {new Date().getFullYear()} ViRu Wadapav. All rights reserved.
         </p>
+        <Link
+          to="/admin"
+          className="mt-3 inline-flex items-center gap-1 text-[11px] text-muted-foreground/60 hover:text-primary transition-colors"
+        >
+          <Lock className="h-3 w-3" /> Admin
+        </Link>
       </div>
     </footer>
   );
