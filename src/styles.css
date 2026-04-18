@@ -148,5 +148,38 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
   }
 }
+
+@layer utilities {
+  .bg-gradient-hero { background-image: var(--gradient-hero); }
+  .bg-gradient-offer { background-image: var(--gradient-offer); }
+  .bg-gradient-card { background-image: var(--gradient-card); }
+  .shadow-soft { box-shadow: var(--shadow-soft); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .text-gradient {
+    background-image: var(--gradient-offer);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes fly-to-cart {
+  0% { transform: scale(1) translateY(0); opacity: 1; }
+  100% { transform: scale(0.2) translateY(-200px); opacity: 0; }
+}
+.animate-pop { animation: pop 0.4s ease-out; }
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-fly { animation: fly-to-cart 0.6s ease-out forwards; }
