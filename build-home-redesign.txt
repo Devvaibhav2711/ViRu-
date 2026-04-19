@@ -1,0 +1,49 @@
+
+> build
+> vite build
+
+[36mvite v7.3.2 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 1905 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/client/[22m[32massets/item-water-mDznULMh.jpg      [39m[1m[2m 10.54 kB[22m[1m[22m
+[2mdist/client/[22m[32massets/item-wadapav-CQWeIFWn.jpg    [39m[1m[2m 24.43 kB[22m[1m[22m
+[2mdist/client/[22m[32massets/item-tea-r9kJTc3-.jpg        [39m[1m[2m 25.55 kB[22m[1m[22m
+[2mdist/client/[22m[32massets/hero-wadapav-CZvb19b0.jpg    [39m[1m[2m 36.64 kB[22m[1m[22m
+[2mdist/client/[22m[32massets/item-pan-CBwf0CGv.jpg        [39m[1m[2m 48.70 kB[22m[1m[22m
+[2mdist/client/[22m[32massets/item-colddrink-DBiqxpd5.jpg  [39m[1m[2m 56.25 kB[22m[1m[22m
+[2mdist/client/[22m[32massets/item-bhel-CRWSuqOy.jpg       [39m[1m[2m 70.61 kB[22m[1m[22m
+[2mdist/client/[22m[32massets/item-bhaji-B106nXH-.jpg      [39m[1m[2m189.17 kB[22m[1m[22m
+[2mdist/client/[22m[35massets/styles-qyWUn1tM.css          [39m[1m[2m 51.79 kB[22m[1m[22m[2m │ gzip:   9.51 kB[22m
+[2mdist/client/[22m[36massets/index-CglFsIMj.js            [39m[1m[33m601.05 kB[39m[22m[2m │ gzip: 175.34 kB[22m
+[33m
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 3.08s[39m
+[36mvite v7.3.2 [32mbuilding ssr environment for production...[36m[39m
+transforming...
+[33m"createRequestHandler", "defineHandlerCallback", "transformPipeableStreamWithRouter" and "transformReadableStreamWithRouter" are imported from external module "@tanstack/router-core/ssr/server" but never used in "../../../../D:/Freelancing/ViRu Wadapav/wadapav-express/node_modules/@tanstack/start-server-core/dist/esm/index.js".[39m
+[33m"RawStream" is imported from external module "@tanstack/router-core" but never used in "../../../../D:/Freelancing/ViRu Wadapav/wadapav-express/node_modules/@tanstack/start-client-core/dist/esm/index.js".[39m
+[33m"hydrate" and "json" are imported from external module "@tanstack/router-core/ssr/client" but never used in "../../../../D:/Freelancing/ViRu Wadapav/wadapav-express/node_modules/@tanstack/start-client-core/dist/esm/index.js".[39m
+[32m✓[39m 71 modules transformed.
+rendering chunks...
+[2mdist/server/[22m[36massets/start-HYkvq4Ni.js                               [39m[1m[2m  0.06 kB[22m[1m[22m
+[2mdist/server/[22m[36massets/__23tanstack-start-plugin-adapters-Cwee5PKy.js  [39m[1m[2m  0.14 kB[22m[1m[22m
+[2mdist/server/[22m[36massets/_tanstack-start-manifest_v-BAMn1DEZ.js          [39m[1m[2m  0.33 kB[22m[1m[22m
+[2mdist/server/[22m[36mserver.js                                              [39m[1m[2m 38.64 kB[22m[1m[22m
+[2mdist/server/[22m[36massets/router-C39enS-L.js                              [39m[1m[2m126.70 kB[22m[1m[22m
+[32m✓ built in 313ms[39m
+[prerender] Prerendering pages...
+[prerender] Concurrency: 12
+[prerender] Crawling: /
+[prerender] Crawling: /about
+[prerender] Crawling: /admin
+[prerender] Crawling: /#menu
+[prerender] Prerendered 4 pages:
+[prerender] - /
+[prerender] - /about
+[prerender] - /admin
+[prerender] - /#menu

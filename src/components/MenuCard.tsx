@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Minus, Plus, ShoppingBag } from "lucide-react";
 import { MenuItem } from "@/data/menu";
 import { useCart } from "@/context/CartContext";
@@ -8,12 +8,43 @@ export function MenuCard({ item, index = 0 }: { item: MenuItem; index?: number }
   const { add } = useCart();
   const [qty, setQty] = useState(1);
   const [bumping, setBumping] = useState(false);
+  const [flying, setFlying] = useState(false);
   const ref = useScrollReveal<HTMLDivElement>();
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleAdd = () => {
     add(item, qty);
+    
+    // Calculate flying animation trajectory
+    if (buttonRef.current) {
+      const btn = buttonRef.current;
+      const btnRect = btn.getBoundingClientRect();
+      const cartIcon = document.querySelector('[aria-label="Open cart"]');
+      
+      if (cartIcon) {
+        const cartRect = cartIcon.getBoundingClientRect();
+        const tx = cartRect.left - btnRect.left;
+        const ty = cartRect.top - btnRect.top;
+        
+        // Create flying product element
+        const flying = document.createElement('div');
+        flying.className = 'fixed pointer-events-none animate-fly-product';
+        flying.style.setProperty('--tx', `${tx}px`);
+        flying.style.setProperty('--ty', `${ty}px`);
+        flying.style.left = `${btnRect.left}px`;
+        flying.style.top = `${btnRect.top}px`;
+        flying.style.width = `${btnRect.width}px`;
+        flying.style.height = `${btnRect.height}px`;
+        flying.innerHTML = `<div class="w-full h-full bg-primary rounded-full flex items-center justify-center text-white font-bold">🍔</div>`;
+        document.body.appendChild(flying);
+        
+        setTimeout(() => flying.remove(), 800);
+      }
+    }
+    
     setBumping(true);
-    setTimeout(() => setBumping(false), 600);
+    setFlying(true);
+    setTimeout(() => { setBumping(false); setFlying(false); }, 600);
     setQty(1);
   };
 
@@ -54,7 +85,7 @@ export function MenuCard({ item, index = 0 }: { item: MenuItem; index?: number }
           <div className="flex items-center rounded-full bg-secondary">
             <button
               onClick={() => setQty(Math.max(1, qty - 1))}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-secondary-foreground hover:bg-muted active:scale-90 transition-transform"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-secondary-foreground hover:bg-muted active:animate-bounce-scale transition-all hover:scale-110"
               aria-label="Decrease"
             >
               <Minus className="h-4 w-4" />
@@ -62,18 +93,19 @@ export function MenuCard({ item, index = 0 }: { item: MenuItem; index?: number }
             <span className="w-8 text-center text-sm font-bold">{qty}</span>
             <button
               onClick={() => setQty(qty + 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-secondary-foreground hover:bg-muted active:scale-90 transition-transform"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-secondary-foreground hover:bg-muted active:animate-bounce-scale transition-all hover:scale-110"
               aria-label="Increase"
             >
               <Plus className="h-4 w-4" />
             </button>
           </div>
           <button
+            ref={buttonRef}
             onClick={handleAdd}
-            className={`ripple flex flex-1 items-center justify-center gap-1.5 rounded-full bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-soft transition-transform active:scale-95 hover:bg-primary/90 ${bumping ? "animate-wiggle" : ""}`}
+            className={`ripple flex flex-1 items-center justify-center gap-1.5 rounded-full bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-soft transition-all active:scale-95 hover:shadow-glow hover:scale-105 ${bumping ? "animate-wiggle" : ""}`}
           >
             <ShoppingBag className={`h-4 w-4 ${bumping ? "animate-pop" : ""}`} />
-            Add
+            Add to Cart
           </button>
         </div>
       </div>

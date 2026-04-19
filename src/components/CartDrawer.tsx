@@ -158,7 +158,7 @@ export function CartDrawer() {
         }`}
       />
       <aside
-        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-background shadow-card transition-transform duration-300 ${
+        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-background shadow-card transition-all duration-400 ease-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
         aria-hidden={!isOpen}
@@ -307,6 +307,38 @@ export function CartDrawer() {
             <h3 className="mt-4 text-xl font-extrabold">Placing your order…</h3>
           </div>
         )}
+        
+        {/* Success Screen with Celebration */}
+        {step === "success" && (
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+            <div className="absolute inset-0 pointer-events-none">
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={i}
+                  className="animate-confetti-burst absolute"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `-10px`,
+                    '--bx': `${(Math.random() - 0.5) * 400}px`,
+                    '--by': `${300 + Math.random() * 200}px`,
+                  } as any}
+                >
+                  {['🎉', '🎊', '✨', '🍔'][Math.floor(Math.random() * 4)]}
+                </div>
+              ))}
+            </div>
+            
+            <div className="relative z-10">
+              <div className="animate-success-pop mb-4">
+                <CheckCircle2 className="h-20 w-20 text-green-500" />
+              </div>
+              <h3 className="text-2xl font-extrabold">Order Confirmed! 🎉</h3>
+              <p className="mt-2 text-sm text-muted-foreground">Your wadapav is on the way!</p>
+              <p className="mt-3 text-xs text-muted-foreground">Order ID: <span className="font-mono font-bold">{reviewFor?.orderId}</span></p>
+              <p className="mt-4 text-lg font-bold text-primary">Thank you for ordering!</p>
+            </div>
+          </div>
+        )}
 
         {/* Checkout form + total (only in cart step) */}
         {step === "cart" && items.length > 0 && (
@@ -446,15 +478,25 @@ export function CartDrawer() {
       </aside>
 
       {step === "success" && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-[fade-in_0.2s_ease-out]">
-          <div className="mx-4 max-w-sm rounded-3xl bg-background p-8 text-center shadow-card animate-bounce-in stitch-border">
-            <CheckCircle2 className="mx-auto h-16 w-16 text-primary animate-pop" />
-            <h3 className="mt-4 text-2xl font-extrabold">Order Placed! 🎉</h3>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-[fade-in_0.2s_ease-out] overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none">
+            {[...Array(15)].map((_, i) => (
+              <div key={i} className="animate-confetti-burst absolute text-2xl" style={{ left: `${Math.random() * 100}%`, top: '-20px', '--bx': `${(Math.random() - 0.5) * 300}px`, '--by': `${250 + Math.random() * 150}px` } as any}>
+                {['🎉', '🎊', '🍔', '✨'][Math.floor(Math.random() * 4)]}
+              </div>
+            ))}
+          </div>
+          <div className="mx-4 max-w-sm rounded-3xl bg-background p-8 text-center shadow-card animate-success-pop stitch-border relative z-10">
+            <CheckCircle2 className="mx-auto h-16 w-16 text-green-500 animate-success-check stroke-[1.5]" style={{ strokeDasharray: 60 }} />
+            <h3 className="mt-4 text-2xl font-extrabold">Order Confirmed! 🎉</h3>
             <p className="mt-1 text-xs text-primary/80 font-semibold inline-flex items-center gap-1">
               <ShieldCheck className="h-4 w-4" /> Phone verified via email
             </p>
-            <p className="mt-2 text-muted-foreground">
-              Thanks {form.name}! We'll deliver your hot food soon.
+            <p className="mt-3 text-sm font-semibold text-primary">
+              Your wadapav is on the way, {form.name}! 🚀
+            </p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Estimated delivery: 25-30 mins
             </p>
           </div>
         </div>

@@ -52,8 +52,10 @@ export function Hero() {
 
           <div className="flex items-end gap-3">
             <span className="text-2xl font-semibold text-white/60 line-through">₹15</span>
-            <span className="text-5xl font-black md:text-6xl">₹13</span>
-            <span className="mb-1 rounded-full bg-accent px-3 py-1 text-xs font-bold text-accent-foreground shadow-soft">
+            <span className="text-5xl font-black md:text-6xl rounded-full p-3 animate-pulse-glow">
+              ₹13
+            </span>
+            <span className="mb-1 rounded-full bg-accent px-3 py-1 text-xs font-bold text-accent-foreground shadow-soft animate-pop">
               TODAY OFFER
             </span>
           </div>
