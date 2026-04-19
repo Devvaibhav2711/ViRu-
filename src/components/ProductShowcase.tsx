@@ -6,7 +6,18 @@ import { useScrollReveal } from "@/lib/effects";
 export function ProductShowcase() {
   const [products, setProducts] = useState<Product[]>([]);
   const [active, setActive] = useState(0);
+  const [incoming, setIncoming] = useState<number | null>(null);
+  const [hovered, setHovered] = useState(false);
   const ref = useScrollReveal<HTMLElement>();
+
+  const transitionTo = (next: number) => {
+    if (next === active || next < 0 || next >= products.length) return;
+    setIncoming(next);
+    window.setTimeout(() => {
+      setActive(next);
+      setIncoming(null);
+    }, 340);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -20,14 +31,20 @@ export function ProductShowcase() {
 
   useEffect(() => {
     if (products.length < 2) return;
+    if (hovered) return;
+
     const timer = window.setInterval(() => {
-      setActive((prev) => (prev + 1) % products.length);
+      transitionTo((active + 1) % products.length);
     }, 3200);
 
     return () => window.clearInterval(timer);
-  }, [products.length]);
+  }, [active, hovered, products.length]);
 
   const activeProduct = useMemo(() => products[active], [products, active]);
+  const incomingProduct = useMemo(() => {
+    if (incoming === null) return null;
+    return products[incoming] ?? null;
+  }, [incoming, products]);
 
   if (!activeProduct) return null;
 
@@ -47,23 +64,37 @@ export function ProductShowcase() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-[1.7fr_1fr]">
-          <article className="relative overflow-hidden rounded-3xl bg-card shadow-card stitch-border">
+          <article
+            className="relative overflow-hidden rounded-3xl bg-card shadow-card stitch-border"
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+          >
             <div className="absolute inset-0 bg-[linear-gradient(120deg,oklch(0.24_0.08_26_/0.64)_0%,transparent_55%)]" />
-            <img
-              src={activeProduct.image}
-              alt={activeProduct.name}
-              className="h-[280px] w-full object-cover md:h-[420px]"
-            />
+
+            <div className="relative h-[280px] w-full md:h-[420px]">
+              <img
+                src={activeProduct.image}
+                alt={activeProduct.name}
+                className={`slide-layer h-full w-full object-cover ${incoming !== null ? "slide-layer-out" : "slide-layer-in"}`}
+              />
+              {incomingProduct ? (
+                <img
+                  src={incomingProduct.image}
+                  alt={incomingProduct.name}
+                  className="slide-layer h-full w-full object-cover slide-layer-next"
+                />
+              ) : null}
+            </div>
 
             <div className="absolute inset-x-0 bottom-0 p-4 md:p-6">
               <div className="max-w-xl rounded-2xl border border-white/25 bg-black/45 p-4 text-white backdrop-blur-md md:p-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/75">Now showing</p>
-                <h3 className="mt-1 text-2xl font-black md:text-3xl">{activeProduct.name}</h3>
-                <p className="mt-1 text-sm text-white/85">{activeProduct.description}</p>
+                <h3 className="mt-1 text-2xl font-black md:text-3xl">{incomingProduct?.name ?? activeProduct.name}</h3>
+                <p className="mt-1 text-sm text-white/85">{incomingProduct?.description ?? activeProduct.description}</p>
                 <div className="mt-3 flex items-center gap-3">
-                  <span className="text-3xl font-black text-accent">₹{activeProduct.price}</span>
-                  {activeProduct.originalPrice ? (
-                    <span className="text-base text-white/65 line-through">₹{activeProduct.originalPrice}</span>
+                  <span className="text-3xl font-black text-accent">₹{incomingProduct?.price ?? activeProduct.price}</span>
+                  {(incomingProduct?.originalPrice ?? activeProduct.originalPrice) ? (
+                    <span className="text-base text-white/65 line-through">₹{incomingProduct?.originalPrice ?? activeProduct.originalPrice}</span>
                   ) : null}
                 </div>
               </div>
@@ -72,7 +103,7 @@ export function ProductShowcase() {
             <div className="absolute right-3 top-3 flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setActive((prev) => (prev - 1 + products.length) % products.length)}
+                onClick={() => transitionTo((active - 1 + products.length) % products.length)}
                 className="rounded-full border border-white/40 bg-black/30 p-2 text-white backdrop-blur transition-colors hover:bg-white/20"
                 aria-label="Previous product"
               >
@@ -80,7 +111,7 @@ export function ProductShowcase() {
               </button>
               <button
                 type="button"
-                onClick={() => setActive((prev) => (prev + 1) % products.length)}
+                onClick={() => transitionTo((active + 1) % products.length)}
                 className="rounded-full border border-white/40 bg-black/30 p-2 text-white backdrop-blur transition-colors hover:bg-white/20"
                 aria-label="Next product"
               >
@@ -94,9 +125,9 @@ export function ProductShowcase() {
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setActive(idx)}
+                onClick={() => transitionTo(idx)}
                 className={`group flex items-center gap-3 rounded-2xl border bg-card p-3 text-left shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-card ${
-                  idx === active
+                  idx === (incoming ?? active)
                     ? "border-primary ring-2 ring-primary/25"
                     : "border-border"
                 }`}
@@ -120,9 +151,9 @@ export function ProductShowcase() {
             <button
               key={item.id}
               type="button"
-              onClick={() => setActive(idx)}
+              onClick={() => transitionTo(idx)}
               aria-label={`Go to ${item.name}`}
-              className={`h-2.5 rounded-full transition-all ${idx === active ? "w-8 bg-primary" : "w-2.5 bg-border"}`}
+              className={`h-2.5 rounded-full transition-all ${idx === (incoming ?? active) ? "w-8 bg-primary" : "w-2.5 bg-border"}`}
             />
           ))}
         </div>

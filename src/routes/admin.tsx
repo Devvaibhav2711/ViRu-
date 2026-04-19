@@ -564,6 +564,9 @@ function ProductsManager({
     <div className="space-y-4">
       <form onSubmit={submit} className="rounded-2xl bg-card p-4 shadow-soft stitch-border space-y-3">
         <h3 className="text-lg font-extrabold">{editingId ? "Edit Product" : "Add New Product"}</h3>
+        <p className="text-xs text-muted-foreground">
+          Product image and description are used in the homepage slideshow.
+        </p>
         <div className="grid gap-3 md:grid-cols-2">
           <input value={form.id} onChange={(e) => setForm({ ...form, id: e.target.value })} placeholder="Product ID (optional)" className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
           <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Product name" className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" required />
