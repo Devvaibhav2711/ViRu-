@@ -35,12 +35,42 @@ CREATE TABLE IF NOT EXISTS reviews (
 );
 
 -- -----------------------------------------------
+-- 3. Products table
+-- -----------------------------------------------
+CREATE TABLE IF NOT EXISTS products (
+  id             TEXT PRIMARY KEY,
+  name           TEXT NOT NULL,
+  price          NUMERIC NOT NULL DEFAULT 0,
+  description    TEXT NOT NULL DEFAULT '',
+  image          TEXT NOT NULL DEFAULT '',
+  original_price NUMERIC,
+  badge          TEXT,
+  active         BOOLEAN NOT NULL DEFAULT true,
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- -----------------------------------------------
 -- 3. Row Level Security (RLS)
 -- -----------------------------------------------
 
 -- Enable RLS on both tables
 ALTER TABLE orders  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies so this script can be re-run safely
+DROP POLICY IF EXISTS "Anyone can insert orders" ON orders;
+DROP POLICY IF EXISTS "Anyone can read orders" ON orders;
+DROP POLICY IF EXISTS "Anyone can update orders" ON orders;
+
+DROP POLICY IF EXISTS "Anyone can insert reviews" ON reviews;
+DROP POLICY IF EXISTS "Anyone can read reviews" ON reviews;
+DROP POLICY IF EXISTS "Anyone can update reviews" ON reviews;
+
+DROP POLICY IF EXISTS "Anyone can read products" ON products;
+DROP POLICY IF EXISTS "Anyone can insert products" ON products;
+DROP POLICY IF EXISTS "Anyone can update products" ON products;
+DROP POLICY IF EXISTS "Anyone can delete products" ON products;
 
 -- Allow anyone (anon role) to insert orders
 CREATE POLICY "Anyone can insert orders"
@@ -79,6 +109,28 @@ CREATE POLICY "Anyone can update reviews"
   TO anon
   USING (true)
   WITH CHECK (true);
+
+-- Products policies (admin dashboard CRUD currently runs with anon key)
+CREATE POLICY "Anyone can read products"
+  ON products FOR SELECT
+  TO anon
+  USING (true);
+
+CREATE POLICY "Anyone can insert products"
+  ON products FOR INSERT
+  TO anon
+  WITH CHECK (true);
+
+CREATE POLICY "Anyone can update products"
+  ON products FOR UPDATE
+  TO anon
+  USING (true)
+  WITH CHECK (true);
+
+CREATE POLICY "Anyone can delete products"
+  ON products FOR DELETE
+  TO anon
+  USING (true);
 
 -- -----------------------------------------------
 -- 4. Keep-alive helper (used by GitHub Actions cron)

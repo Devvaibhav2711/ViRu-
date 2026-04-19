@@ -1,7 +1,20 @@
-import { menuItems } from "@/data/menu";
+import { useEffect, useState } from "react";
 import { MenuCard } from "./MenuCard";
+import { getProducts, type Product } from "@/lib/storage";
 
 export function Menu() {
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    getProducts(false).then((list) => {
+      if (mounted) setProducts(list);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <section id="menu" className="container mx-auto px-4 py-12 md:py-16">
       <div className="mb-8 text-center">
@@ -11,7 +24,7 @@ export function Menu() {
         <p className="mt-2 text-muted-foreground">Hot, fresh & made with love ❤️</p>
       </div>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
-        {menuItems.map((item, i) => (
+        {products.map((item, i) => (
           <MenuCard key={item.id} item={item} index={i} />
         ))}
       </div>
