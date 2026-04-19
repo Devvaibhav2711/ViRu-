@@ -20,7 +20,7 @@ export function Navbar() {
           <Link to="/about" className="rounded-full px-4 py-1.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted">
             About Us
           </Link>
-          <a href="#menu" className="rounded-full px-4 py-1.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted">
+          <a href="/#menu" className="rounded-full px-4 py-1.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted">
             Menu
           </a>
         </nav>
@@ -37,6 +37,20 @@ export function Navbar() {
             </span>
           )}
         </button>
+      </div>
+
+      <div className="border-t border-border/50 px-4 py-2 md:hidden">
+        <nav className="container mx-auto flex items-center justify-center gap-2 rounded-full border border-border/60 bg-card/80 p-1">
+          <Link to="/" className="rounded-full px-4 py-1.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted">
+            Home
+          </Link>
+          <Link to="/about" className="rounded-full px-4 py-1.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted">
+            About Us
+          </Link>
+          <a href="/#menu" className="rounded-full px-4 py-1.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted">
+            Menu
+          </a>
+        </nav>
       </div>
     </header>
   );
