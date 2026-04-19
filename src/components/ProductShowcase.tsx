@@ -1,14 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getProducts, type Product } from "@/lib/storage";
-import { useScrollReveal } from "@/lib/effects";
 
 export function ProductShowcase() {
   const [products, setProducts] = useState<Product[]>([]);
   const [active, setActive] = useState(0);
   const [incoming, setIncoming] = useState<number | null>(null);
   const [hovered, setHovered] = useState(false);
-  const ref = useScrollReveal<HTMLElement>();
 
   const transitionTo = (next: number) => {
     if (next === active || next < 0 || next >= products.length) return;
@@ -21,8 +19,11 @@ export function ProductShowcase() {
 
   useEffect(() => {
     let mounted = true;
-    getProducts(false).then((items) => {
-      if (mounted) setProducts(items.slice(0, 6));
+    getProducts(true).then((items) => {
+      if (!mounted) return;
+      const activeItems = items.filter((item) => item.active);
+      const source = activeItems.length > 0 ? activeItems : items;
+      setProducts(source.slice(0, 6));
     });
     return () => {
       mounted = false;
@@ -46,10 +47,21 @@ export function ProductShowcase() {
     return products[incoming] ?? null;
   }, [incoming, products]);
 
-  if (!activeProduct) return null;
+  if (!activeProduct) {
+    return (
+      <section className="relative overflow-hidden px-4 py-12 md:py-16">
+        <div className="container mx-auto rounded-3xl border border-border bg-card p-8 text-center shadow-card stitch-border">
+          <p className="text-lg font-bold">Slideshow is ready</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Add products from Admin to display images and descriptions here.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section ref={ref} className="reveal relative overflow-hidden px-4 py-12 md:py-16">
+    <section className="relative overflow-hidden px-4 py-12 md:py-16">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_15%,oklch(0.8_0.16_75_/0.16),transparent_30%),radial-gradient(circle_at_90%_0%,oklch(0.62_0.2_27_/0.18),transparent_38%)]" />
 
       <div className="container mx-auto">
