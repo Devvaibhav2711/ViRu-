@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getProducts, type Product } from "@/lib/storage";
+import { useScrollReveal } from "@/lib/effects";
 
 export function ProductShowcase() {
   const [products, setProducts] = useState<Product[]>([]);
   const [active, setActive] = useState(0);
+  const ref = useScrollReveal<HTMLElement>();
 
   useEffect(() => {
     let mounted = true;
@@ -30,7 +32,7 @@ export function ProductShowcase() {
   if (!activeProduct) return null;
 
   return (
-    <section className="relative overflow-hidden px-4 py-12 md:py-16">
+    <section ref={ref} className="reveal relative overflow-hidden px-4 py-12 md:py-16">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_15%,oklch(0.8_0.16_75_/0.16),transparent_30%),radial-gradient(circle_at_90%_0%,oklch(0.62_0.2_27_/0.18),transparent_38%)]" />
 
       <div className="container mx-auto">
