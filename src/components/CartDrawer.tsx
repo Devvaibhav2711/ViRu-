@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Minus, Plus, Trash2, X, CheckCircle2, Loader2, Mail, ShieldCheck } from "lucide-react";
+import { Minus, Plus, Trash2, X, CheckCircle2, Loader2, Mail, ShieldCheck, MapPin, Store } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { saveOrder } from "@/lib/storage";
 import { fireConfetti } from "@/lib/effects";
@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { ReviewModal } from "./ReviewModal";
 
 type Step = "cart" | "otp" | "verifying" | "placing" | "success";
+type DeliveryType = "home" | "shop" | null;
 
 export function CartDrawer() {
   const { isOpen, setOpen, items, setQty, remove, total, clear } = useCart();
@@ -14,16 +15,58 @@ export function CartDrawer() {
   const [step, setStep] = useState<Step>("cart");
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [reviewFor, setReviewFor] = useState<{ orderId: string; name: string } | null>(null);
+  const [deliveryType, setDeliveryType] = useState<DeliveryType>(null);
+  const [creditPoints] = useState(240); // Mock credit points - can be fetched from DB
 
   const emailValid = /^\S+@\S+\.\S+$/.test(form.email);
   const phoneValid = form.phone.replace(/\D/g, "").length >= 10;
+  const addressRequired = deliveryType === "home";
   const canOrder =
-    items.length > 0 && form.name.trim() && phoneValid && emailValid && form.address.trim();
+    items.length > 0 &&
+    form.name.trim() &&
+    phoneValid &&
+    emailValid &&
+    deliveryType &&
+    (addressRequired ? form.address.trim() : true);
+
+  // Validate form fields
+  const validateFields = () => {
+    const errors: { [key: string]: string } = {};
+
+    if (!form.name.trim()) {
+      errors.name = "Please enter name";
+    }
+
+    if (!form.phone.trim()) {
+      errors.phone = "Please enter mobile no";
+    } else if (form.phone.replace(/\D/g, "").length < 10) {
+      errors.phone = "Mobile no must be at least 10 digits";
+    }
+
+    if (!form.email.trim()) {
+      errors.email = "Please enter email";
+    } else if (!emailValid) {
+      errors.email = "Email must be valid (e.g., user@example.com)";
+    }
+
+    if (!deliveryType) {
+      errors.deliveryType = "Please select delivery type (Shop or Home)";
+    }
+
+    if (addressRequired && !form.address.trim()) {
+      errors.address = "Please enter address";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   // Step 1: Send OTP to customer's email
   const sendOtp = async () => {
-    if (!canOrder) return;
+    if (!validateFields()) return;
+
     setStep("verifying");
     setOtpError("");
 
@@ -91,6 +134,8 @@ export function CartDrawer() {
       setReviewFor({ orderId: order.id, name: form.name.trim() });
       clear();
       setForm({ name: "", phone: "", email: "", address: "" });
+      setDeliveryType(null);
+      setFieldErrors({});
       setOpen(false);
     }, 2000);
   };
@@ -266,36 +311,117 @@ export function CartDrawer() {
         {/* Checkout form + total (only in cart step) */}
         {step === "cart" && items.length > 0 && (
           <div className="space-y-3 border-t border-border bg-card p-4">
-            <div className="space-y-2">
-              <input
-                type="text"
-                placeholder="Your name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary transition-colors"
-              />
-              <input
-                type="tel"
-                placeholder="Phone number (10 digits)"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary transition-colors"
-              />
-              <input
-                type="email"
-                placeholder="Email address (for verification)"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary transition-colors"
-              />
-              <textarea
-                placeholder="Delivery address"
-                rows={2}
-                value={form.address}
-                onChange={(e) => setForm({ ...form, address: e.target.value })}
-                className="w-full resize-none rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary transition-colors"
-              />
+            {/* Credit Points Display */}
+            <div className="rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 p-3 border border-primary/20">
+              <p className="text-xs text-muted-foreground">Available Credits</p>
+              <p className="text-lg font-extrabold text-primary">{creditPoints} points</p>
             </div>
+
+            {/* Delivery Type Selection */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground">Delivery Type *</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setDeliveryType("shop");
+                    setFieldErrors({ ...fieldErrors, deliveryType: "" });
+                  }}
+                  className={`flex-1 rounded-xl py-2.5 px-3 text-sm font-semibold transition-all border ${
+                    deliveryType === "shop"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-background text-muted-foreground hover:border-primary/50"
+                  }`}
+                >
+                  <Store className="h-4 w-4 inline mr-1" /> Shop
+                </button>
+                <button
+                  onClick={() => {
+                    setDeliveryType("home");
+                    setFieldErrors({ ...fieldErrors, deliveryType: "" });
+                  }}
+                  className={`flex-1 rounded-xl py-2.5 px-3 text-sm font-semibold transition-all border ${
+                    deliveryType === "home"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-background text-muted-foreground hover:border-primary/50"
+                  }`}
+                >
+                  <MapPin className="h-4 w-4 inline mr-1" /> Home
+                </button>
+              </div>
+              {fieldErrors.deliveryType && (
+                <p className="text-xs text-destructive font-medium">{fieldErrors.deliveryType}</p>
+              )}
+            </div>
+
+            {/* Form Fields */}
+            <div className="space-y-2">
+              <div>
+                <input
+                  type="text"
+                  placeholder="Your name"
+                  value={form.name}
+                  onChange={(e) => {
+                    setForm({ ...form, name: e.target.value });
+                    if (e.target.value.trim()) setFieldErrors({ ...fieldErrors, name: "" });
+                  }}
+                  className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition-colors ${
+                    fieldErrors.name ? "border-destructive bg-destructive/5 focus:border-destructive" : "border-border bg-background focus:border-primary"
+                  }`}
+                />
+                {fieldErrors.name && <p className="text-xs text-destructive font-medium mt-1">{fieldErrors.name}</p>}
+              </div>
+
+              <div>
+                <input
+                  type="tel"
+                  placeholder="Phone number (10 digits)"
+                  value={form.phone}
+                  onChange={(e) => {
+                    setForm({ ...form, phone: e.target.value });
+                    if (e.target.value.replace(/\D/g, "").length >= 10) setFieldErrors({ ...fieldErrors, phone: "" });
+                  }}
+                  className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition-colors ${
+                    fieldErrors.phone ? "border-destructive bg-destructive/5 focus:border-destructive" : "border-border bg-background focus:border-primary"
+                  }`}
+                />
+                {fieldErrors.phone && <p className="text-xs text-destructive font-medium mt-1">{fieldErrors.phone}</p>}
+              </div>
+
+              <div>
+                <input
+                  type="email"
+                  placeholder="Email address (for verification)"
+                  value={form.email}
+                  onChange={(e) => {
+                    setForm({ ...form, email: e.target.value });
+                    if (/^\S+@\S+\.\S+$/.test(e.target.value)) setFieldErrors({ ...fieldErrors, email: "" });
+                  }}
+                  className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition-colors ${
+                    fieldErrors.email ? "border-destructive bg-destructive/5 focus:border-destructive" : "border-border bg-background focus:border-primary"
+                  }`}
+                />
+                {fieldErrors.email && <p className="text-xs text-destructive font-medium mt-1">{fieldErrors.email}</p>}
+              </div>
+
+              {addressRequired && (
+                <div>
+                  <textarea
+                    placeholder="Delivery address"
+                    rows={2}
+                    value={form.address}
+                    onChange={(e) => {
+                      setForm({ ...form, address: e.target.value });
+                      if (e.target.value.trim()) setFieldErrors({ ...fieldErrors, address: "" });
+                    }}
+                    className={`w-full resize-none rounded-xl border px-4 py-2.5 text-sm outline-none transition-colors ${
+                      fieldErrors.address ? "border-destructive bg-destructive/5 focus:border-destructive" : "border-border bg-background focus:border-primary"
+                    }`}
+                  />
+                  {fieldErrors.address && <p className="text-xs text-destructive font-medium mt-1">{fieldErrors.address}</p>}
+                </div>
+              )}
+            </div>
+
             {otpError && step === "cart" && (
               <p className="text-sm text-destructive font-medium">{otpError}</p>
             )}
