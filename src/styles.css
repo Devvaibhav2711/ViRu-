@@ -214,6 +214,15 @@
 @keyframes spin-slow {
   to { transform: rotate(360deg); }
 }
+@keyframes hero-zoom {
+  0%, 100% { transform: scale(1.02); }
+  50% { transform: scale(1.08); }
+}
+@keyframes line-slide {
+  0% { transform: translateY(75%); opacity: 0; }
+  20%, 80% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-75%); opacity: 0; }
+}
 
 .animate-pop { animation: pop 0.4s ease-out; }
 .animate-float { animation: float 3s ease-in-out infinite; }
@@ -226,6 +235,8 @@
   animation: gradient-shift 6s ease infinite;
 }
 .animate-spin-slow { animation: spin-slow 8s linear infinite; }
+.hero-bg-image { animation: hero-zoom 16s ease-in-out infinite; }
+.hero-line-move { animation: line-slide 2.1s ease both; }
 
 /* Dribbble-style stitch border */
 .stitch-border {
