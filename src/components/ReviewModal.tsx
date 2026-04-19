@@ -16,9 +16,9 @@ export function ReviewModal({
   const [comment, setComment] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const submit = () => {
+  const submit = async () => {
     if (rating === 0) return;
-    saveReview({ orderId, customerName, rating, comment: comment.trim() });
+    await saveReview({ orderId, customerName, rating, comment: comment.trim() });
     setSubmitted(true);
     setTimeout(onClose, 1800);
   };

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   ShoppingBag,
   IndianRupee,
@@ -10,18 +10,20 @@ import {
   CheckCircle2,
   Clock,
   Bell,
+  ShieldCheck,
+  RefreshCw,
 } from "lucide-react";
 import {
   getOrders,
   getReviews,
-  subscribeToStorage,
+  subscribeToChanges,
   updateOrderStatus,
   markReviewSeen,
   type Order,
   type Review,
 } from "@/lib/storage";
 
-const ADMIN_PIN = "1234";
+const ADMIN_PIN = "ViRuwadapav2711";
 const PIN_KEY = "viru_admin_unlocked";
 
 export const Route = createFileRoute("/admin")({
@@ -72,7 +74,6 @@ function AdminPage() {
           </p>
           <input
             type="password"
-            inputMode="numeric"
             placeholder="Enter PIN"
             value={pin}
             onChange={(e) => setPin(e.target.value)}
@@ -86,9 +87,6 @@ function AdminPage() {
           >
             Unlock 🔓
           </button>
-          <p className="mt-3 text-center text-xs text-muted-foreground">
-            Demo PIN: <span className="font-mono font-bold">1234</span>
-          </p>
           <Link
             to="/"
             className="mt-4 flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-primary"
@@ -107,21 +105,39 @@ function Dashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [tab, setTab] = useState<"orders" | "reviews">("orders");
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    const [o, r] = await Promise.all([getOrders(), getReviews()]);
+    setOrders(o);
+    setReviews(r);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
-    const refresh = () => {
-      setOrders(getOrders());
-      setReviews(getReviews());
-    };
-    refresh();
-    return subscribeToStorage(refresh);
-  }, []);
+    fetchData();
+    // Subscribe to realtime changes from Supabase
+    const unsub = subscribeToChanges(() => {
+      fetchData();
+    });
+    return unsub;
+  }, [fetchData]);
 
   const totalRevenue = orders.reduce((s, o) => s + o.total, 0);
   const pendingOrders = orders.filter((o) => o.status === "pending").length;
   const pendingFeedback = reviews.filter((r) => !r.seenByAdmin).length;
   const avgRating =
     reviews.length > 0 ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : "—";
+
+  const handleToggle = async (id: string, status: Order["status"]) => {
+    await updateOrderStatus(id, status);
+    fetchData();
+  };
+
+  const handleSeen = async (id: string) => {
+    await markReviewSeen(id);
+    fetchData();
+  };
 
   const logout = () => {
     sessionStorage.removeItem(PIN_KEY);
@@ -140,6 +156,13 @@ function Dashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => fetchData()}
+              className="rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground"
+              title="Refresh data"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </button>
             <Link
               to="/"
               className="rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground"
@@ -157,64 +180,72 @@ function Dashboard() {
       </header>
 
       <main className="container mx-auto px-4 py-6 space-y-6">
-        {/* Stat cards */}
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <StatCard
-            icon={<ShoppingBag className="h-5 w-5" />}
-            label="Total Orders"
-            value={orders.length.toString()}
-            tint="primary"
-          />
-          <StatCard
-            icon={<IndianRupee className="h-5 w-5" />}
-            label="Revenue"
-            value={`₹${totalRevenue}`}
-            tint="accent"
-          />
-          <StatCard
-            icon={<Clock className="h-5 w-5" />}
-            label="Pending Orders"
-            value={pendingOrders.toString()}
-            tint="primary"
-          />
-          <StatCard
-            icon={<Bell className="h-5 w-5" />}
-            label="New Feedback"
-            value={pendingFeedback.toString()}
-            tint="accent"
-            pulse={pendingFeedback > 0}
-          />
-        </div>
-
-        <div className="rounded-2xl bg-card p-4 shadow-soft stitch-border">
-          <div className="flex items-center gap-2">
-            <Star className="h-5 w-5 fill-accent text-accent" />
-            <span className="font-bold text-lg">{avgRating}</span>
-            <span className="text-sm text-muted-foreground">
-              avg rating · {reviews.length} review{reviews.length !== 1 ? "s" : ""}
-            </span>
+        {loading ? (
+          <div className="flex h-60 items-center justify-center">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex gap-2 border-b border-border">
-          <TabButton active={tab === "orders"} onClick={() => setTab("orders")}>
-            Orders ({orders.length})
-          </TabButton>
-          <TabButton active={tab === "reviews"} onClick={() => setTab("reviews")}>
-            Reviews ({reviews.length})
-            {pendingFeedback > 0 && (
-              <span className="ml-1 rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-bold text-accent-foreground">
-                {pendingFeedback}
-              </span>
-            )}
-          </TabButton>
-        </div>
-
-        {tab === "orders" ? (
-          <OrdersList orders={orders} onToggle={(id, s) => updateOrderStatus(id, s)} />
         ) : (
-          <ReviewsList reviews={reviews} onSeen={(id) => markReviewSeen(id)} />
+          <>
+            {/* Stat cards */}
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <StatCard
+                icon={<ShoppingBag className="h-5 w-5" />}
+                label="Total Orders"
+                value={orders.length.toString()}
+                tint="primary"
+              />
+              <StatCard
+                icon={<IndianRupee className="h-5 w-5" />}
+                label="Revenue"
+                value={`₹${totalRevenue}`}
+                tint="accent"
+              />
+              <StatCard
+                icon={<Clock className="h-5 w-5" />}
+                label="Pending Orders"
+                value={pendingOrders.toString()}
+                tint="primary"
+              />
+              <StatCard
+                icon={<Bell className="h-5 w-5" />}
+                label="New Feedback"
+                value={pendingFeedback.toString()}
+                tint="accent"
+                pulse={pendingFeedback > 0}
+              />
+            </div>
+
+            <div className="rounded-2xl bg-card p-4 shadow-soft stitch-border">
+              <div className="flex items-center gap-2">
+                <Star className="h-5 w-5 fill-accent text-accent" />
+                <span className="font-bold text-lg">{avgRating}</span>
+                <span className="text-sm text-muted-foreground">
+                  avg rating · {reviews.length} review{reviews.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-2 border-b border-border">
+              <TabButton active={tab === "orders"} onClick={() => setTab("orders")}>
+                Orders ({orders.length})
+              </TabButton>
+              <TabButton active={tab === "reviews"} onClick={() => setTab("reviews")}>
+                Reviews ({reviews.length})
+                {pendingFeedback > 0 && (
+                  <span className="ml-1 rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-bold text-accent-foreground">
+                    {pendingFeedback}
+                  </span>
+                )}
+              </TabButton>
+            </div>
+
+            {tab === "orders" ? (
+              <OrdersList orders={orders} onToggle={handleToggle} />
+            ) : (
+              <ReviewsList reviews={reviews} onSeen={handleSeen} />
+            )}
+          </>
         )}
       </main>
     </div>
@@ -301,6 +332,11 @@ function OrdersList({
               <div className="flex items-center gap-2">
                 <span className="font-mono text-xs text-muted-foreground">{o.id}</span>
                 <StatusBadge status={o.status} />
+                {o.phoneVerified && (
+                  <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
+                    <ShieldCheck className="h-3 w-3" /> Verified
+                  </span>
+                )}
               </div>
               <p className="mt-1 font-bold">{o.customer.name}</p>
               <p className="text-xs text-muted-foreground">
