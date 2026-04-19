@@ -23,11 +23,11 @@ export function Hero() {
         alt="Hot crispy Vada Pav with green chutney"
         width={1280}
         height={960}
-        className="hero-bg-image absolute inset-0 h-full w-full object-cover"
+        className="fixed inset-0 h-full w-full object-cover -z-20"
       />
 
-      <div className="absolute inset-0 bg-[linear-gradient(120deg,oklch(0.24_0.09_26_/0.85)_0%,oklch(0.28_0.08_40_/0.76)_45%,oklch(0.58_0.14_72_/0.40)_100%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,oklch(0.83_0.2_75_/0.25),transparent_34%),radial-gradient(circle_at_80%_12%,oklch(0.66_0.2_28_/0.23),transparent_34%)]" />
+      <div className="fixed inset-0 bg-[linear-gradient(120deg,oklch(0.24_0.09_26_/0.85)_0%,oklch(0.28_0.08_40_/0.76)_45%,oklch(0.58_0.14_72_/0.40)_100%)] -z-20" />
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_15%_20%,oklch(0.83_0.2_75_/0.25),transparent_34%),radial-gradient(circle_at_80%_12%,oklch(0.66_0.2_28_/0.23),transparent_34%)] -z-20" />
 
       <span className="absolute left-5 top-18 text-4xl opacity-70 md:left-10 md:top-14">🌶️</span>
       <span className="absolute right-6 top-18 text-5xl opacity-70 md:right-14 md:top-22">🍅</span>
